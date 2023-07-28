@@ -20,6 +20,8 @@ def get_data(value, row):
     response = requests.get(url=url).json()['data']['products'][0]
     pages = int(response['pics'])
     photo_links = ''
+
+    about_item = ''
     
     for i in range(100):
         if i < 10:
@@ -29,6 +31,14 @@ def get_data(value, row):
                 for page in range(pages):
                     text = f'https://basket-{i}.wb.ru/vol{value[:-5]}/part{value[:-3]}/{value}/images/big/{page}.jpg'
                     photo_links += f'{text}\n'
+
+                response_about = requests.get(f'https://basket-{i}.wb.ru/vol{value[:-5]}/part{value[:-3]}/{value}/info/ru/card.json').json()['grouped_options']
+                for options in response_about:
+                    group_name = options['group_name']
+                    about_item_lower += group_name + '\n\n'
+                    for option in options['options']:
+                        about_item_lower += f'{option["name"]} - {option["value"]}' + '\n'
+                    about_item += about_item_lower + '\n\n\n'
                 break
         except:
             pass
@@ -37,6 +47,7 @@ def get_data(value, row):
     cells_data.append(str(response['sale']))
     cells_data.append(str(response['reviewRating']))
     cells_data.append(str(response['feedbacks']))
+    cells_data.append(str(about_item))
 
     for i, cell_data in enumerate(cells_data):
         sheet.update_cell(row, i + 2, cell_data)
